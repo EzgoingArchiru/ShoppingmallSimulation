@@ -18,13 +18,16 @@ public class JwtTokenizer {
     private final SecretKey secretKey;
     private final Long accessTokenExpirationSeconds;
     private final Long refreshTokenExpirationSeconds;
+    private final String issuer;
     public JwtTokenizer(
             @Value("${app.jwt.secret}") String secret,
+            @Value("${app.jwt.issuer}") String issuer,
             @Value("${app.jwt.access-token-expiration-seconds}") Long accessTokenExpirationSeconds,
             @Value("${app.jwt.refresh-token-expiration-seconds}") Long refreshTokenExpirationSeconds) {
         this.accessTokenExpirationSeconds = accessTokenExpirationSeconds;
         this.refreshTokenExpirationSeconds = refreshTokenExpirationSeconds;
         this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
+        this.issuer = issuer;
     }
     public static class ACCESS_TOKEN_CLAIMS {
         public static final String GRANT_TYPE = "grant";
@@ -41,7 +44,7 @@ public class JwtTokenizer {
     }
     public String generateAccessToken(AccessTokenDto accessTokenDto) {
         return Jwts.builder()
-                .issuer("teemo-server")
+                .issuer(issuer)
                 .subject(accessTokenDto.id().toString())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + accessTokenExpirationSeconds * 1000))
@@ -54,7 +57,7 @@ public class JwtTokenizer {
     }
     public String generateRefreshToken(RefreshTokenDto refreshTokenDto) {
         return Jwts.builder()
-                .issuer("teemo-server")
+                .issuer(issuer)
                 .subject(refreshTokenDto.id().toString())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + refreshTokenExpirationSeconds * 1000))
