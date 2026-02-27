@@ -1,6 +1,6 @@
 package io.github.ezgoingarchiru.shoppingmall.simulation.users;
 
-public enum UserType {
-    CUSTOMER,
-    SELLER;
+public enum GrantType {
+    NORMAL,
+    ADMIN
 }

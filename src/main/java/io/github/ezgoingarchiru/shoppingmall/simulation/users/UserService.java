@@ -1,9 +1,10 @@
 package io.github.ezgoingarchiru.shoppingmall.simulation.users;
 
 import io.github.ezgoingarchiru.shoppingmall.simulation.exceptions.EntityNotFoundException;
-import io.github.ezgoingarchiru.shoppingmall.simulation.users.dto.UserCreateRequest;
-import io.github.ezgoingarchiru.shoppingmall.simulation.users.dto.UserGetResponse;
-import io.github.ezgoingarchiru.shoppingmall.simulation.users.dto.UserPatchRequest;
+import io.github.ezgoingarchiru.shoppingmall.simulation.users.dto.*;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,7 +14,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
+@Validated
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -44,7 +47,7 @@ public class UserService {
         }
         String passwordHash = passwordEncoder.encode(password);
 
-        User user = User.create(email, passwordHash, userType, nickname);
+        User user = User.create(email, passwordHash, userType, nickname, GrantType.NORMAL);
         try {
             userRepository.save(user);
         } catch(DataIntegrityViolationException e) {
@@ -57,16 +60,15 @@ public class UserService {
     }
     @Transactional
     @PreAuthorize("hasRole('ADMIN') or authentication.principal.id == #id")
-    public void deleteUser(Long id) {
+    public void deleteUser(@NotNull Long id) {
         userRepository.deleteById(id);
     }
 
     @Transactional
-    @PreAuthorize("hasRole('ADMIN') or authentication.principal.id == #userPatchRequest.id()")
-    public Long patchUser(UserPatchRequest userPatchRequest) {
+    @PreAuthorize("hasRole('ADMIN') or authentication.principal.id == #id")
+    public Long patchUser(@NotNull Long id, @Valid UserPatchRequest userPatchRequest) {
         String password = userPatchRequest.password();
         String nickname = userPatchRequest.nickname();
-        Long id = userPatchRequest.id();
 
         User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(User.class.getSimpleName(), "id=" + id));
         if(nickname != null) {
@@ -81,7 +83,8 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserGetResponse getUser(Long id) {
+    @PreAuthorize("hasRole('ADMIN') or authentication.principal.id == #id")
+    public UserGetResponse getUser(@NotNull Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(User.class.getSimpleName(), "id=" + id));
         return UserGetResponse.from(user);
     }

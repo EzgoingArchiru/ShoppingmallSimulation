@@ -5,8 +5,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class JavaShoppingWorld {
+public class ShoppingmallSimulation {
     public static void main(String[] args) {
-        SpringApplication.run(JavaShoppingWorld.class, args);
+        SpringApplication.run(ShoppingmallSimulation.class, args);
     }
 }

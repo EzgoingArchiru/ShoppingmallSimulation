@@ -8,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
@@ -24,6 +25,7 @@ public class User {
     @Column(nullable = false, unique = true, length = 255)
     @Email
     @NotBlank
+    @NaturalId
     protected String email;
 
     @Column(nullable = false, length = 255)
@@ -42,6 +44,10 @@ public class User {
     @Column(nullable = false)
     protected UserType type;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    protected GrantType grantType;
+
     @CreationTimestamp
     @Column(updatable = false, nullable = false)
     protected LocalDateTime createdAt;
@@ -50,12 +56,13 @@ public class User {
     @Column(nullable = false)
     protected LocalDateTime updatedAt;
 
-    public static User create(String email, String passwordHash, UserType type, String nickname) {
+    public static User create(String email, String passwordHash, UserType type, String nickname, GrantType grantType) {
         User user = new User();
         user.email = email;
         user.passwordHash = passwordHash;
         user.type = type;
         user.nickname = nickname;
+        user.grantType = grantType;
         return user;
     }
 }
